@@ -1,0 +1,13 @@
+Django==5.2.4
+djangorestframework==3.16.0
+django-cors-headers==4.7.0
+Pillow==10.4.0
+python-decouple
+pywebview
+jdatetime==5.0.0
+pandas==2.1.4
+openpyxl==3.1.2
+django-import-export==4.0.0
+
+# Windows Service Dependencies
+pywin32==306

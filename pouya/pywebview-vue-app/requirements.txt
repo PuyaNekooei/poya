@@ -1,0 +1,23 @@
+# PyWebView and Web Framework
+pywebview
+bottle
+
+# Windows Printing Support
+pywin32
+
+# Image Processing for Thermal Printing
+Pillow
+
+# Persian Text Support
+python-bidi
+arabic-reshaper
+
+# Psian Calendar
+jdatetime
+
+# HTTP Client for API Communication
+requests
+
+# Additional Dependencies
+setuptools
+wheel
