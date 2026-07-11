@@ -1,9 +1,11 @@
 {
 	"folders": [
 		{
+			"name": "backend",
 			"path": "backend"
 		},
 		{
+			"name": "pywebview-vue-app",
 			"path": "pywebview-vue-app"
 		}
 	]

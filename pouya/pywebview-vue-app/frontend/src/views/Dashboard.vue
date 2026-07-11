@@ -1516,13 +1516,15 @@ body {
 
 .customer-info {
   display: flex;
-  gap: 15px;
+  flex-direction: column;
+  gap: 12px;
   margin-bottom: 20px;
 }
 
 .customer-name-input,
-.customer-phone-input {
-  flex: 1;
+.customer-phone-input,
+.customer-table-select {
+  width: 100%;
 }
 
 .order-items h3 {

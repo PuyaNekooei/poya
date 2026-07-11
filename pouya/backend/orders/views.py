@@ -62,7 +62,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def today(self, request):
         """Get today's orders"""
-        today = timezone.now().date()
+        today = timezone.localdate()
         orders = Order.objects.filter(created_at__date=today).order_by('-created_at')
         serializer = self.get_serializer(orders, many=True)
         return Response(serializer.data)
@@ -100,7 +100,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         Used by the customer-facing status page and the dashboard status panel.
         Returns only the fields needed to display status (no prices/items)."""
-        today = timezone.now().date()
+        today = timezone.localdate()
         orders = Order.objects.filter(created_at__date=today).order_by('-created_at')
         data = [{
             'id': order.id,
@@ -116,7 +116,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def statistics(self, request):
         """Get order statistics"""
-        today = timezone.now().date()
+        today = timezone.localdate()
         
         today_orders = Order.objects.filter(created_at__date=today)
         total_orders = today_orders.count()

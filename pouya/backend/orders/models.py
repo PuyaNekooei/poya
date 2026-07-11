@@ -1,7 +1,7 @@
 from typing import Any
 
 
-from django.db import models
+from django.db import models, transaction, IntegrityError
 from django.contrib.auth.models import User
 from menu.models import MenuItem
 from django.utils import timezone
@@ -70,13 +70,38 @@ class Order(models.Model):
     def __str__(self):
         return f"Order #{self.order_number} - {self.customer_name}"
 
+    def _next_order_number(self):
+        # Derive the next daily sequence from the highest existing number for
+        # today, not from a row count — a count reuses numbers after deletions.
+        # Use localdate() so the day rolls over at Tehran midnight, not UTC.
+        today = timezone.localdate()
+        jalali_date = jdatetime.date.fromgregorian(date=today)
+        prefix = f"ORD-{jalali_date.strftime('%Y%m%d')}-"
+        last = (Order.objects
+                .filter(order_number__startswith=prefix)
+                .order_by('-order_number')
+                .first())
+        next_seq = (int(last.order_number.split('-')[-1]) + 1) if last else 1001
+        return f"{prefix}{next_seq:04d}"
+
     def save(self, *args, **kwargs):
-        if not self.order_number:
-            # Generate order number based on Jalali date and sequence
-            today = timezone.now().date()
-            jalali_date = jdatetime.date.fromgregorian(date=today)
-            today_orders = Order.objects.filter(created_at__date=today).count()
-            self.order_number = f"ORD-{jalali_date.strftime('%Y%m%d')}-{1000+today_orders + 1:03d}"
+        if self.order_number:
+            super().save(*args, **kwargs)
+            return
+        # Retry on the rare race where two orders pick the same number
+        # concurrently: the DB unique constraint rejects the loser, so we
+        # regenerate and try again.
+        for _attempt in range(5):
+            self.order_number = self._next_order_number()
+            try:
+                with transaction.atomic():
+                    super().save(*args, **kwargs)
+                return
+            except IntegrityError:
+                self.order_number = ''
+                continue
+        # Final attempt outside the retry loop so a genuine error propagates.
+        self.order_number = self._next_order_number()
         super().save(*args, **kwargs)
 
 
